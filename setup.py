@@ -27,11 +27,11 @@ from setuptools import setup, find_packages
 
 setup(
     name="tensorflow-model",
-    version="0.1.0",
+    version="0.1.1",
     author="tobe",
     author_email="tobeg3oogle@gmail.com",
     url="https://github.com/tobegit3hub/tfmodel",
-    install_requires=["tensorflow"],
+    install_requires=["coloredlogs", "prettytable", "tensorflow"],
     description="Command-line tool to inspect TensorFlow models",
     packages=find_packages(),
     zip_safe=False,

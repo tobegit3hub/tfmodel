@@ -20,6 +20,16 @@ Install with `docker`.
 docker run -it -v /:/host tobegit3hub/tfmodel bash
 ```
 
+Install from source.
+
+```bash
+git clone https://github.com/tobegit3hub/tfmodel
+
+cd ./tfmodel
+
+python ./setup.py install
+```
+
 ## Usage
 
 ### Validate Model
