@@ -7,6 +7,7 @@ from prettytable import PrettyTable
 
 from utils import ModelUtil
 
+
 class SavedmodelAnalyst(object):
   """
   The helper class to access TensorFlow Savedmodel.
@@ -61,8 +62,6 @@ class SavedmodelAnalyst(object):
     """
     Inspect the model to print the model signature.    
     """
-
-    logging.info("Try to inspect the model")
 
     if self.validate() == False:
       logging.error("Fail to load the model")
@@ -202,13 +201,10 @@ class SavedmodelAnalyst(object):
 
     print(table)
 
-
-  def inference_model_with_mock_data(self):
+  def benchmark_model_with_mock_data(self):
     """
-    Generate mock data to inference the model and print performance.
+    Generate mock data to benchmark the model and print performance.
     """
-
-    logging.info("Try to inference the model with mock data")
 
     if self.validate() == False:
       logging.error("Fail to load the model")
@@ -223,7 +219,7 @@ class SavedmodelAnalyst(object):
           self.model_version_path))
 
     except Exception as e:
-      logging.info("Fail to inspect model and error: {}".format(e))
+      logging.info("Fail to benchmark model and error: {}".format(e))
 
     # Get the model signature
     model_graph_signature = list(meta_graph.signature_def.items())[0][1]
@@ -243,14 +239,85 @@ class SavedmodelAnalyst(object):
           input_items, batch_size)
 
       #logging.info("Generate input feed_dict: {}".format(feed_dict_map))
-      #import ipdb;ipdb.set_trace()
 
       start_time = time.time()
       # Example: [array([[1., 1.], [1., 1.]], dtype=float32), array([[1], [1]], dtype=int32), array([1, 1])]
       result_ndarrays = session.run(output_op_names, feed_dict=feed_dict_map)
+
       inference_time = time.time() - start_time
       qps = 1.0 / inference_time
 
       #logging.info("Inference resuolt: {}".format(result_ndarrays))
       logging.info("Inference batch size: {}, time: {}s, qps: {}".format(
           batch_size, inference_time, qps))
+
+  def export_tensorboard_files(self, tensorboard_path):
+    """
+    Read the model and export the TensorBoard files.
+    """
+
+    if self.validate() == False:
+      logging.error("Fail to load the model")
+      return
+
+    try:
+      graph = graph = tf.Graph()
+      session = tf.Session()
+
+      #merged = tf.summary.merge_all()
+
+      meta_graph = tf.saved_model.loader.load(
+          session, [tf.saved_model.tag_constants.SERVING],
+          self.model_version_path)
+      logging.info("Succeed to load model in: {}".format(
+          self.model_version_path))
+
+      tensorboard_writer = tf.summary.FileWriter(tensorboard_path,
+                                                 session.graph)
+      #tensorboard_writer.add_summary(summary)
+      logging.info("Write tensorboard")
+
+    except Exception as e:
+      logging.info("Fail to benchmark model and error: {}".format(e))
+
+    # Get the model signature
+    model_graph_signature = list(meta_graph.signature_def.items())[0][1]
+
+    # Generate output op names for infernece
+    output_op_names = []
+    for item in model_graph_signature.outputs.items():
+      output_op_name = item[1].name
+      output_op_names.append(output_op_name)
+
+    input_items = model_graph_signature.inputs.items()
+
+    #tf.summary.scalar('test', tf.constant(1))
+    #merged = tf.summary.merge_all()
+    """
+    feed_dict_map = ModelUtil.construct_feed_dict_with_batch(
+            input_items, 1)
+
+    #logging.info("Generate input feed_dict: {}".format(feed_dict_map))
+    # Example: [array([[1., 1.], [1., 1.]], dtype=float32), array([[1], [1]], dtype=int32), array([1, 1])]
+    #result_ndarrays = session.run(output_op_names, feed_dict=feed_dict_map)
+    """
+
+    #summary, _= session.run([merged, output_op_names], feed_dict=feed_dict_map)
+    """
+    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+    run_metadata = tf.RunMetadata()
+    session.run(tf.global_variables_initializer())
+
+
+    summary, _= session.run([merged, output_op_names],
+                            feed_dict=feed_dict_map,
+                            options=run_options,
+                            run_metadata=run_metadata)
+
+
+    tensorboard_writer.add_run_metadata(run_metadata, 'step%d' % 1)
+    tensorboard_writer.add_summary(summary, 1)
+    """
+
+    logging.info(
+        "Success to export the tensorboard files: {}".format(tensorboard_path))

@@ -47,12 +47,22 @@ def inspect_model(args):
   savedmodel.inspect_model()
 
 
-def inference_model(args):
-  logging.info("Try to inference the model: {}".format(args.model))
+def benchmark_model(args):
+  logging.info("Try to benchmark the model: {}".format(args.model))
 
   savedmodel = SavedmodelAnalyst(args.model)
 
-  savedmodel.inference_model_with_mock_data()
+  savedmodel.benchmark_model_with_mock_data()
+
+
+def export_model_tensorboard(args):
+  tensorboard_path = "./tensorboard"
+  logging.info("Try to export the model: {}, tensorboard file; {}".format(
+      args.model, tensorboard_path))
+
+  savedmodel = SavedmodelAnalyst(args.model)
+
+  savedmodel.export_tensorboard_files(tensorboard_path)
 
 
 def main():
@@ -77,10 +87,15 @@ def main():
   inspect_parser.add_argument("model", help="Path of the model")
   inspect_parser.set_defaults(func=inspect_model)
 
-  # subcommand: inference
-  inference_parser = main_subparser.add_parser("inference")
-  inference_parser.add_argument("model", help="Path of the model")
-  inference_parser.set_defaults(func=inference_model)
+  # subcommand: benchmark
+  benchmark_parser = main_subparser.add_parser("benchmark")
+  benchmark_parser.add_argument("model", help="Path of the model")
+  benchmark_parser.set_defaults(func=benchmark_model)
+
+  # subcommand: tensorboard
+  tensorboard_parser = main_subparser.add_parser("tensorboard")
+  tensorboard_parser.add_argument("model", help="Path of the model")
+  tensorboard_parser.set_defaults(func=export_model_tensorboard)
   """
   # subcommand: study describe
   study_describe_parser = study_subparser.add_parser(

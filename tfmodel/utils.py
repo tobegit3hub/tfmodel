@@ -3,6 +3,10 @@ import tensorflow as tf
 
 
 class ModelUtil(object):
+  """
+  The utils class for TensorFlow models with static methods.
+  """
+
   @staticmethod
   def construct_feed_dict_with_batch(input_items, batch_size=1):
     #batch_size = 100000
