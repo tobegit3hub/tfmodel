@@ -81,7 +81,6 @@ def main():
   inference_parser = main_subparser.add_parser("inference")
   inference_parser.add_argument("model", help="Path of the model")
   inference_parser.set_defaults(func=inference_model)
-
   """
   # subcommand: study describe
   study_describe_parser = study_subparser.add_parser(
