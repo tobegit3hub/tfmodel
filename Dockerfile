@@ -9,4 +9,4 @@ WORKDIR /tfmodel/
 # RUN pip install tensorflow-model
 RUN python ./setup.py install
 
-CMD ["/bin/bash"]
+CMD ["/smoke_test.sh"]
