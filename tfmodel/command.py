@@ -19,18 +19,32 @@ import argparse
 import logging
 import pkg_resources
 import sys
+import coloredlogs
 
 from tfmodel.savedmodel_analyst import SavedmodelAnalyst
 
+coloredlogs.install()
 logging.basicConfig(level=logging.DEBUG)
 
 
-def inspect_model(args):
-  print("Inspect the model: {}".format(args.model))
+def validate_model(args):
+  logging.info("Try to validate the model: {}".format(args.model))
 
   savedmodel = SavedmodelAnalyst(args.model)
-  savedmodel.print_signature()
 
+  is_validated = savedmodel.validate()
+  if is_validated:
+    logging.info("Yes, it is the validated model")
+  else:
+    logging.error("False, it is not validated model")
+
+
+def inspect_model(args):
+  logging.info("Try to inspect the model: {}".format(args.model))
+
+  savedmodel = SavedmodelAnalyst(args.model)
+
+  savedmodel.print_signature()
 
 
 def main():
@@ -45,11 +59,15 @@ def main():
 
   main_subparser = parser.add_subparsers(dest="command_group", help="Commands")
 
+  # subcommand: validate
+  validate_parser = main_subparser.add_parser("validate")
+  validate_parser.add_argument("model", help="Path of the model")
+  validate_parser.set_defaults(func=validate_model)
+
   # subcommand: inspect
   inspect_parser = main_subparser.add_parser("inspect")
-  parser.add_argument("model", help="Path of the model")
+  inspect_parser.add_argument("model", help="Path of the model")
   inspect_parser.set_defaults(func=inspect_model)
-
   """
   # subcommand: study describe
   study_describe_parser = study_subparser.add_parser(
