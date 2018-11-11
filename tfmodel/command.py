@@ -44,7 +44,15 @@ def inspect_model(args):
 
   savedmodel = SavedmodelAnalyst(args.model)
 
-  savedmodel.print_signature()
+  savedmodel.inspect_model()
+
+
+def inference_model(args):
+  logging.info("Try to inference the model: {}".format(args.model))
+
+  savedmodel = SavedmodelAnalyst(args.model)
+
+  savedmodel.inference_model_with_mock_data()
 
 
 def main():
@@ -68,6 +76,12 @@ def main():
   inspect_parser = main_subparser.add_parser("inspect")
   inspect_parser.add_argument("model", help="Path of the model")
   inspect_parser.set_defaults(func=inspect_model)
+
+  # subcommand: inference
+  inference_parser = main_subparser.add_parser("inference")
+  inference_parser.add_argument("model", help="Path of the model")
+  inference_parser.set_defaults(func=inference_model)
+
   """
   # subcommand: study describe
   study_describe_parser = study_subparser.add_parser(
